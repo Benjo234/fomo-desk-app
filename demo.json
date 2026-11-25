@@ -1,0 +1,1171 @@
+{
+  "example": true,
+  "state": {
+    "balance": 41.82,
+    "todayPct": 16.17,
+    "multiplier": 1.1617,
+    "mode": "PAPER",
+    "updatedAt": "2026-11-25T23:18:00+01:00",
+    "paperStartCash": 36.0,
+    "lane": {
+      "bot": "executor",
+      "action": "buying",
+      "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump"
+    },
+    "screen": {
+      "available": false,
+      "updatedAt": "2026-11-25T23:17:48+01:00",
+      "fresh": false,
+      "planBIntervalS": 15,
+      "coinLink": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link",
+      "coinSymbol": "Pompom"
+    },
+    "lastOrder": {
+      "id": 2,
+      "ts": "2026-11-25T23:14:12+01:00",
+      "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+      "symbol": "Pompom",
+      "side": "buy",
+      "usd": 4.32,
+      "pct": 12.0,
+      "bot": "executor",
+      "status": "done",
+      "checks": {
+        "screen": true,
+        "api": false,
+        "chain": true
+      },
+      "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+    },
+    "bots": [
+      {
+        "name": "scanner",
+        "color": "#64d2ff",
+        "status": "running",
+        "count": 14,
+        "title": "14 pools",
+        "subtitle": "\u2192 Analyst",
+        "paused": false,
+        "pauseLocked": false,
+        "last": {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "verdict": "pass",
+          "reason": null,
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        },
+        "feed": [
+          {
+            "symbol": "Pompom",
+            "verdict": "pass",
+            "reason": "\u2192 Analyst"
+          },
+          {
+            "symbol": "ANSEM",
+            "verdict": "kill",
+            "reason": "top 10 hold 59%"
+          },
+          {
+            "symbol": "PEPE2",
+            "verdict": "kill",
+            "reason": "copycat of Pepe"
+          }
+        ]
+      },
+      {
+        "name": "analyst",
+        "color": "#ffd60a",
+        "status": "running",
+        "count": 4,
+        "title": "4 taken apart",
+        "subtitle": "Social: off",
+        "paused": false,
+        "pauseLocked": false,
+        "score": 82,
+        "layers": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "last": {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "score": 82,
+          "pass": 1,
+          "reason": null,
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      },
+      {
+        "name": "brain",
+        "color": "#bf5af2",
+        "status": "running",
+        "count": 2,
+        "title": "$4.32 \u00b7 12% of cash",
+        "subtitle": "80+ = full size",
+        "paused": false,
+        "pauseLocked": false,
+        "last": {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "usd": 4.32,
+          "pct": 12.0,
+          "capHit": "none",
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      },
+      {
+        "name": "executor",
+        "color": "#00d35a",
+        "status": "running",
+        "count": 2,
+        "title": "2 trades",
+        "subtitle": "\u2713 Bought \u00b7 verified",
+        "paused": false,
+        "pauseLocked": false,
+        "last": {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "status": "done",
+          "usd": 4.32,
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      },
+      {
+        "name": "risk",
+        "color": "#ff6b9a",
+        "status": "running",
+        "count": 1,
+        "title": "Guarding",
+        "subtitle": "stop -22% \u00b7 trail 40%",
+        "paused": false,
+        "pauseLocked": true,
+        "stopPct": 22,
+        "trailPct": 40,
+        "last": null
+      }
+    ],
+    "positions": [
+      {
+        "id": 1,
+        "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+        "symbol": "Pompom",
+        "name": "Pompompurin",
+        "opened_at": "2026-11-25T23:02:10+01:00",
+        "entry_price": 0.00024,
+        "current_price": 0.000294,
+        "size_usd": 4.32,
+        "tokens": 18000,
+        "peak_price": 0.00031,
+        "stop_price": 0.000187,
+        "tp_done": 0,
+        "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+      }
+    ],
+    "activityPreview": [
+      {
+        "id": 3,
+        "ts": "2026-11-25T23:14:12+01:00",
+        "kind": "bought",
+        "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+        "bot": "executor",
+        "title": "Bought Pompom",
+        "subtitle": "Executor \u00b7 23:14",
+        "value": "$4.32 \u00b7 12% of cash",
+        "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+      },
+      {
+        "id": 2,
+        "ts": "2026-11-25T23:09:44+01:00",
+        "kind": "sold",
+        "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+        "bot": "executor",
+        "title": "Sold Pompom",
+        "subtitle": "Executor \u00b7 take profit 50%",
+        "value": "+$6.40 \u00b7 +102%",
+        "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+      },
+      {
+        "id": 1,
+        "ts": "2026-11-25T22:48:03+01:00",
+        "kind": "rejected",
+        "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+        "bot": "analyst",
+        "title": "Rejected ANSEM",
+        "subtitle": "Analyst \u00b7 top 10 hold 58%",
+        "value": "Skipped",
+        "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+      }
+    ]
+  },
+  "charts": {
+    "LIVE": {
+      "range": "LIVE",
+      "startValue": 36.0,
+      "points": [
+        {
+          "ts": "2026-11-25T22:00:00+01:00",
+          "value": 36.0
+        },
+        {
+          "ts": "2026-11-25T22:20:00+01:00",
+          "value": 35.4
+        },
+        {
+          "ts": "2026-11-25T22:45:00+01:00",
+          "value": 34.9
+        },
+        {
+          "ts": "2026-11-25T23:02:00+01:00",
+          "value": 38.1
+        },
+        {
+          "ts": "2026-11-25T23:09:00+01:00",
+          "value": 42.3
+        },
+        {
+          "ts": "2026-11-25T23:14:00+01:00",
+          "value": 41.82
+        }
+      ],
+      "marks": [
+        {
+          "ts": "2026-11-25T22:45:00+01:00",
+          "kind": "stopped",
+          "label": "-25% \u00b7 -$1.10",
+          "color": "red",
+          "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump"
+        },
+        {
+          "ts": "2026-11-25T23:02:00+01:00",
+          "kind": "bought",
+          "label": "Bought Pompom",
+          "color": "blue",
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump"
+        },
+        {
+          "ts": "2026-11-25T23:09:00+01:00",
+          "kind": "sold",
+          "label": "+$6.40",
+          "color": "green",
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump"
+        }
+      ]
+    }
+  },
+  "activity": {
+    "rows": [
+      {
+        "id": 4,
+        "ts": "2026-11-25T23:14:12+01:00",
+        "kind": "bought",
+        "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+        "bot": "executor",
+        "title": "Bought Pompom",
+        "subtitle": "Executor \u00b7 23:14",
+        "value": "$4.32 \u00b7 12% of cash",
+        "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+      },
+      {
+        "id": 3,
+        "ts": "2026-11-25T23:09:44+01:00",
+        "kind": "sold",
+        "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+        "bot": "executor",
+        "title": "Sold Pompom",
+        "subtitle": "Executor \u00b7 take profit 50%",
+        "value": "+$6.40 \u00b7 +102%",
+        "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+      },
+      {
+        "id": 2,
+        "ts": "2026-11-25T22:48:03+01:00",
+        "kind": "stopped",
+        "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+        "bot": "risk",
+        "title": "Stopped ANSEM",
+        "subtitle": "Risk \u00b7 -22% stop",
+        "value": "-$1.10",
+        "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+      },
+      {
+        "id": 1,
+        "ts": "2026-11-25T22:31:15+01:00",
+        "kind": "rejected",
+        "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+        "bot": "analyst",
+        "title": "Rejected ANSEM",
+        "subtitle": "Analyst \u00b7 top 10 hold 58%",
+        "value": "Skipped",
+        "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+      }
+    ],
+    "next": null,
+    "pageSize": 30
+  },
+  "coins": {
+    "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump": {
+      "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+      "name": "Pompompurin",
+      "symbol": "Pompom",
+      "chain": "Solana",
+      "age": "4h old",
+      "shield": "8/8",
+      "price": 0.000294,
+      "changeSinceEntry": 22.5,
+      "candles": [
+        {
+          "ts": "2026-11-25T23:00:00+01:00",
+          "price": 0.000232,
+          "volume_m5": 1800
+        },
+        {
+          "ts": "2026-11-25T23:03:00+01:00",
+          "price": 0.00024,
+          "volume_m5": 2400
+        },
+        {
+          "ts": "2026-11-25T23:06:00+01:00",
+          "price": 0.000268,
+          "volume_m5": 3100
+        },
+        {
+          "ts": "2026-11-25T23:09:00+01:00",
+          "price": 0.00031,
+          "volume_m5": 4200
+        },
+        {
+          "ts": "2026-11-25T23:12:00+01:00",
+          "price": 0.000281,
+          "volume_m5": 2600
+        },
+        {
+          "ts": "2026-11-25T23:15:00+01:00",
+          "price": 0.000294,
+          "volume_m5": 2950
+        }
+      ],
+      "marketCap": 294000,
+      "liquidity": 38671,
+      "holders": 5946,
+      "position": {
+        "entry_price": 0.00024,
+        "size_usd": 4.32,
+        "tokens": 18000,
+        "stop_price": 0.000187
+      },
+      "exitLine": 0.000187,
+      "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+    }
+  },
+  "audits": {
+    "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump": {
+      "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "name": "The Black Bull",
+      "symbol": "ANSEM",
+      "score": 58,
+      "passed": false,
+      "reason": "top 10 hold 58%",
+      "social": {
+        "pts": 0,
+        "label": "Social: off"
+      },
+      "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link",
+      "layers": [
+        {
+          "n": 1,
+          "name": "Mint authority",
+          "pass": true,
+          "value": "Revoked",
+          "source": "rpc"
+        },
+        {
+          "n": 2,
+          "name": "Freeze authority",
+          "pass": true,
+          "value": "Revoked",
+          "source": "rpc"
+        },
+        {
+          "n": 3,
+          "name": "Dev wallet",
+          "pass": true,
+          "value": "0.0% \u00b7 sold 0",
+          "source": "rugcheck"
+        },
+        {
+          "n": 4,
+          "name": "Top 10",
+          "pass": false,
+          "value": "top 10 hold 58%",
+          "source": "rugcheck"
+        },
+        {
+          "n": 5,
+          "name": "Liquidity",
+          "pass": null,
+          "value": "not checked",
+          "source": "\u2014"
+        },
+        {
+          "n": 6,
+          "name": "Pool age",
+          "pass": null,
+          "value": "not checked",
+          "source": "\u2014"
+        },
+        {
+          "n": 7,
+          "name": "Bundles",
+          "pass": null,
+          "value": "not checked",
+          "source": "\u2014"
+        },
+        {
+          "n": 8,
+          "name": "Delegations",
+          "pass": null,
+          "value": "not checked",
+          "source": "\u2014"
+        }
+      ]
+    },
+    "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump": {
+      "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+      "name": "Pompompurin",
+      "symbol": "Pompom",
+      "score": 82,
+      "passed": true,
+      "reason": null,
+      "social": {
+        "pts": 0,
+        "label": "Social: off"
+      },
+      "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link",
+      "layers": [
+        {
+          "n": 1,
+          "name": "Mint authority",
+          "pass": true,
+          "value": "Revoked",
+          "source": "rpc"
+        },
+        {
+          "n": 2,
+          "name": "Freeze authority",
+          "pass": true,
+          "value": "Revoked",
+          "source": "rpc"
+        },
+        {
+          "n": 3,
+          "name": "Dev wallet",
+          "pass": true,
+          "value": "0.0% \u00b7 sold 0",
+          "source": "rugcheck"
+        },
+        {
+          "n": 4,
+          "name": "Top 10",
+          "pass": true,
+          "value": "16.8%",
+          "source": "rugcheck"
+        },
+        {
+          "n": 5,
+          "name": "Liquidity",
+          "pass": true,
+          "value": "100% burned",
+          "source": "rugcheck"
+        },
+        {
+          "n": 6,
+          "name": "Pool age",
+          "pass": true,
+          "value": "43m",
+          "source": "dexscreener"
+        },
+        {
+          "n": 7,
+          "name": "Bundles",
+          "pass": true,
+          "value": "2 bundled \u00b7 0 networks",
+          "source": "rugcheck"
+        },
+        {
+          "n": 8,
+          "name": "Delegations",
+          "pass": true,
+          "value": "None",
+          "source": "rpc"
+        }
+      ]
+    }
+  },
+  "decisions": {
+    "scanner": {
+      "bot": "scanner",
+      "decisions": [
+        {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "verdict": "pass",
+          "reason": null,
+          "ts": "23:00",
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        },
+        {
+          "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+          "symbol": "ANSEM",
+          "verdict": "kill",
+          "reason": "top 10 hold 59%",
+          "ts": "22:31",
+          "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      ]
+    },
+    "analyst": {
+      "bot": "analyst",
+      "decisions": [
+        {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "score": 82,
+          "passed": true,
+          "reason": null,
+          "ts": "23:01",
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        },
+        {
+          "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+          "symbol": "ANSEM",
+          "score": 58,
+          "passed": false,
+          "reason": "top 10 hold 58%",
+          "ts": "22:31",
+          "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      ]
+    },
+    "brain": {
+      "bot": "brain",
+      "decisions": [
+        {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "usd": 4.32,
+          "pct": 12.0,
+          "status": "done",
+          "ts": "23:01",
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      ]
+    },
+    "executor": {
+      "bot": "executor",
+      "decisions": [
+        {
+          "mint": "5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump",
+          "symbol": "Pompom",
+          "side": "buy",
+          "usd": 4.32,
+          "status": "done",
+          "ts": "23:14",
+          "link": "https://fomo.family/coin?address=5EmvWDizkpjAXbcfCcVq69w1id8GaLzi4LLwtuSgpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      ]
+    },
+    "risk": {
+      "bot": "risk",
+      "decisions": [
+        {
+          "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+          "symbol": "ANSEM",
+          "side": "sell",
+          "reason": "stop",
+          "status": "done",
+          "ts": "22:48",
+          "link": "https://fomo.family/coin?address=9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump&chainId=1399811149&r=daddybenny&source=share_link"
+        }
+      ]
+    }
+  },
+  "account": {
+    "mode": "PAPER",
+    "fomoHandle": "daddybenny",
+    "profileUrl": "https://fomo.family/profile/daddybenny?source=share_link&r=daddybenny",
+    "signupUrl": "https://fomo.family/r/daddybenny",
+    "push": {
+      "channel": "telegram",
+      "planB": "Telegram only",
+      "connected": true
+    },
+    "copyPicks": "off",
+    "withdrawAddressSet": false
+  },
+  "settings": {
+    "mode": "PAPER",
+    "groups": {
+      "scanner": [
+        {
+          "name": "min_liquidity_usd",
+          "key": "min_liquidity_usd",
+          "value": 20000,
+          "type": "float",
+          "default": 20000,
+          "min": 1000,
+          "max": 1000000
+        },
+        {
+          "name": "max_top10_pct",
+          "key": "max_top10_pct",
+          "value": 25,
+          "type": "float",
+          "default": 25,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "name": "max_h1_change_pct",
+          "key": "max_h1_change_pct",
+          "value": 200,
+          "type": "float",
+          "default": 200,
+          "min": 10,
+          "max": 2000
+        },
+        {
+          "name": "poll_s",
+          "key": "poll_s",
+          "value": 60,
+          "type": "float",
+          "default": 60,
+          "min": 5,
+          "max": 600
+        },
+        {
+          "name": "min_pool_age_min",
+          "key": "min_pool_age_min",
+          "value": 10,
+          "type": "float",
+          "default": 10,
+          "min": 1,
+          "max": 180
+        },
+        {
+          "name": "max_wait_min",
+          "key": "max_wait_min",
+          "value": 60,
+          "type": "float",
+          "default": 60,
+          "min": 10,
+          "max": 1440
+        },
+        {
+          "name": "runner_h24_pct",
+          "key": "runner_h24_pct",
+          "value": 300,
+          "type": "float",
+          "default": 300,
+          "min": 50,
+          "max": 5000
+        },
+        {
+          "name": "min_holders_growth_pct",
+          "key": "min_holders_growth_pct",
+          "value": 0,
+          "type": "float",
+          "default": 0,
+          "min": -50,
+          "max": 50
+        }
+      ],
+      "analyst": [
+        {
+          "name": "max_dev_pct",
+          "key": "max_dev_pct",
+          "value": 5,
+          "type": "float",
+          "default": 5,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "max_top10_pct",
+          "key": "max_top10_pct",
+          "value": 25,
+          "type": "float",
+          "default": 25,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "name": "min_lp_locked_pct",
+          "key": "min_lp_locked_pct",
+          "value": 99,
+          "type": "float",
+          "default": 99,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "max_bundled",
+          "key": "max_bundled",
+          "value": 5,
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 50
+        },
+        {
+          "name": "max_delegated_accounts",
+          "key": "max_delegated_accounts",
+          "value": 10,
+          "type": "int",
+          "default": 10,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "name": "retries",
+          "key": "retries",
+          "value": 3,
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 10
+        },
+        {
+          "name": "min_score",
+          "key": "min_score",
+          "value": 70,
+          "type": "float",
+          "default": 70,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "alive_volume_h1",
+          "key": "alive_volume_h1",
+          "value": 25000,
+          "type": "float",
+          "default": 25000,
+          "min": 0,
+          "max": 10000000
+        },
+        {
+          "name": "fast_curve_min",
+          "key": "fast_curve_min",
+          "value": 10,
+          "type": "float",
+          "default": 10,
+          "min": 1,
+          "max": 120
+        },
+        {
+          "name": "max_fresh_pct",
+          "key": "max_fresh_pct",
+          "value": 50,
+          "type": "float",
+          "default": 50,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "organic_unique_h1",
+          "key": "organic_unique_h1",
+          "value": 80,
+          "type": "float",
+          "default": 80,
+          "min": 1,
+          "max": 10000
+        },
+        {
+          "name": "organic_buys_h1",
+          "key": "organic_buys_h1",
+          "value": 150,
+          "type": "float",
+          "default": 150,
+          "min": 1,
+          "max": 10000
+        },
+        {
+          "name": "bundled_penalty",
+          "key": "bundled_penalty",
+          "value": 0.5,
+          "type": "float",
+          "default": 0.5,
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "flush_sell_ratio",
+          "key": "flush_sell_ratio",
+          "value": 1.5,
+          "type": "float",
+          "default": 1.5,
+          "min": 1,
+          "max": 10
+        },
+        {
+          "name": "chase_h1_pct",
+          "key": "chase_h1_pct",
+          "value": 200,
+          "type": "float",
+          "default": 200,
+          "min": 10,
+          "max": 2000
+        }
+      ],
+      "social": [
+        {
+          "name": "social_weight",
+          "key": "social_weight",
+          "value": 0.5,
+          "type": "float",
+          "default": 0.5,
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "social_max_per_h",
+          "key": "social_max_per_h",
+          "value": 20,
+          "type": "int",
+          "default": 20,
+          "min": 0,
+          "max": 200
+        },
+        {
+          "name": "social_timeout_s",
+          "key": "social_timeout_s",
+          "value": 120,
+          "type": "float",
+          "default": 120,
+          "min": 10,
+          "max": 600
+        },
+        {
+          "name": "shill_cut",
+          "key": "shill_cut",
+          "value": 0.5,
+          "type": "float",
+          "default": 0.5,
+          "min": 0,
+          "max": 1
+        }
+      ],
+      "brain": [
+        {
+          "name": "risk_per_trade_pct",
+          "key": "risk_per_trade_pct",
+          "value": 3,
+          "type": "float",
+          "default": 3,
+          "min": 0.1,
+          "max": 20
+        },
+        {
+          "name": "full_size_score",
+          "key": "full_size_score",
+          "value": 80,
+          "type": "float",
+          "default": 80,
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "below_full_pct",
+          "key": "below_full_pct",
+          "value": 50,
+          "type": "float",
+          "default": 50,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "name": "max_pool_pct",
+          "key": "max_pool_pct",
+          "value": 2,
+          "type": "float",
+          "default": 2,
+          "min": 0.1,
+          "max": 20
+        },
+        {
+          "name": "min_ticket_usd",
+          "key": "min_ticket_usd",
+          "value": 2,
+          "type": "float",
+          "default": 2,
+          "min": 0.5,
+          "max": 100
+        },
+        {
+          "name": "max_ticket_usd",
+          "key": "max_ticket_usd",
+          "value": 50,
+          "type": "float",
+          "default": 50,
+          "min": 2,
+          "max": 10000
+        },
+        {
+          "name": "max_trades_night",
+          "key": "max_trades_night",
+          "value": 30,
+          "type": "int",
+          "default": 30,
+          "min": 1,
+          "max": 200
+        }
+      ],
+      "executor": [
+        {
+          "name": "dip_pct",
+          "key": "dip_pct",
+          "value": 15,
+          "type": "float",
+          "default": 15,
+          "min": 1,
+          "max": 50
+        },
+        {
+          "name": "dip_window_min",
+          "key": "dip_window_min",
+          "value": 10,
+          "type": "float",
+          "default": 10,
+          "min": 1,
+          "max": 120
+        },
+        {
+          "name": "dip_wait_min",
+          "key": "dip_wait_min",
+          "value": 30,
+          "type": "float",
+          "default": 30,
+          "min": 1,
+          "max": 180
+        },
+        {
+          "name": "crash_pct",
+          "key": "crash_pct",
+          "value": 35,
+          "type": "float",
+          "default": 35,
+          "min": 10,
+          "max": 90
+        },
+        {
+          "name": "tp_x",
+          "key": "tp_x",
+          "value": 2.0,
+          "type": "float",
+          "default": 2.0,
+          "min": 1.1,
+          "max": 10
+        },
+        {
+          "name": "tp_sell_pct",
+          "key": "tp_sell_pct",
+          "value": 50,
+          "type": "float",
+          "default": 50,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "name": "trail_pct",
+          "key": "trail_pct",
+          "value": 40,
+          "type": "float",
+          "default": 40,
+          "min": 5,
+          "max": 80
+        },
+        {
+          "name": "recheck_liq_drop_pct",
+          "key": "recheck_liq_drop_pct",
+          "value": 20,
+          "type": "float",
+          "default": 20,
+          "min": 1,
+          "max": 90
+        },
+        {
+          "name": "recheck_price_up_pct",
+          "key": "recheck_price_up_pct",
+          "value": 15,
+          "type": "float",
+          "default": 15,
+          "min": 1,
+          "max": 90
+        },
+        {
+          "name": "quote_timeout_s",
+          "key": "quote_timeout_s",
+          "value": 10,
+          "type": "float",
+          "default": 10,
+          "min": 2,
+          "max": 60
+        },
+        {
+          "name": "verify_timeout_s",
+          "key": "verify_timeout_s",
+          "value": 30,
+          "type": "float",
+          "default": 30,
+          "min": 5,
+          "max": 120
+        }
+      ],
+      "risk": [
+        {
+          "name": "poll_s",
+          "key": "risk_poll_s",
+          "value": 5,
+          "type": "float",
+          "default": 5,
+          "min": 1,
+          "max": 60
+        },
+        {
+          "name": "stop_pct",
+          "key": "stop_pct",
+          "value": 25,
+          "type": "float",
+          "default": 25,
+          "min": 5,
+          "max": 80
+        },
+        {
+          "name": "timeout_h",
+          "key": "timeout_h",
+          "value": 3,
+          "type": "float",
+          "default": 3,
+          "min": 0.25,
+          "max": 24
+        },
+        {
+          "name": "timeout_min_gain_pct",
+          "key": "timeout_min_gain_pct",
+          "value": 5,
+          "type": "float",
+          "default": 5,
+          "min": 0,
+          "max": 50
+        },
+        {
+          "name": "night_loss_stop_pct",
+          "key": "night_loss_stop_pct",
+          "value": 30,
+          "type": "float",
+          "default": 30,
+          "min": 1,
+          "max": 100
+        }
+      ],
+      "desk": [
+        {
+          "name": "paper_start_cash",
+          "key": "paper_start_cash",
+          "value": 36,
+          "type": "float",
+          "default": 36,
+          "min": 1,
+          "max": 1000000
+        },
+        {
+          "name": "night_start",
+          "key": "night_start",
+          "value": "22:00",
+          "type": "time",
+          "default": "22:00"
+        },
+        {
+          "name": "lock_time",
+          "key": "lock_time",
+          "value": "06:30",
+          "type": "time",
+          "default": "06:30"
+        },
+        {
+          "name": "report_time",
+          "key": "report_time",
+          "value": "08:00",
+          "type": "time",
+          "default": "08:00"
+        },
+        {
+          "name": "notifier",
+          "key": "notifier",
+          "value": "telegram",
+          "type": "enum",
+          "default": "telegram",
+          "choices": [
+            "telegram",
+            "webpush"
+          ]
+        },
+        {
+          "name": "fomo_handle",
+          "key": "fomo_handle",
+          "value": "daddybenny",
+          "type": "handle",
+          "default": ""
+        },
+        {
+          "name": "withdraw_address",
+          "key": "withdraw_address",
+          "value": "",
+          "type": "address",
+          "default": ""
+        },
+        {
+          "name": "rpc_url",
+          "key": "rpc_url",
+          "value": "https://api.mainnet-beta.solana.com",
+          "type": "https_url",
+          "default": "https://api.mainnet-beta.solana.com"
+        },
+        {
+          "name": "push_rejects",
+          "key": "push_rejects",
+          "value": false,
+          "type": "bool",
+          "default": false
+        },
+        {
+          "name": "fee_pct",
+          "key": "fee_pct",
+          "value": 0.45,
+          "type": "float",
+          "default": 0.45,
+          "min": 0,
+          "max": 5
+        },
+        {
+          "name": "copy_picks",
+          "key": "copy_picks",
+          "value": "off",
+          "type": "enum",
+          "default": "off",
+          "choices": [
+            "off",
+            "24h",
+            "12h",
+            "6h"
+          ]
+        }
+      ]
+    }
+  }
+}

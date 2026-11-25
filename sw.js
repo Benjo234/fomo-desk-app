@@ -1,4 +1,4 @@
-const CACHE = "desk-shell-v12";
+const CACHE = "desk-shell-v13";
 const ASSETS = [
   "./",
   "./index.html",

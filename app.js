@@ -109,29 +109,109 @@
     return { params, tok, apikey, sbUrl };
   }
 
+  // DESK_A2HS_KEEP_HASH: iOS standalone storage is separate from Safari.
+  function isStandalone() {
+    try {
+      if (window.navigator && window.navigator.standalone === true) return true;
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return true;
+    } catch (_) {}
+    return false;
+  }
+
+  function extractSetupFromText(raw) {
+    let text = String(raw || "").trim();
+    if (!text) return { tok: "", apikey: "", sbUrl: "" };
+    try {
+      if (text.indexOf("%23") >= 0 || text.indexOf("%3D") >= 0 || text.indexOf("%26") >= 0) {
+        text = decodeURIComponent(text);
+      }
+    } catch (_) {}
+    const hashIdx = text.indexOf("#");
+    if (hashIdx >= 0) {
+      const p = parseHashParams("#" + text.slice(hashIdx + 1));
+      if (p && (p.tok || p.apikey || p.sbUrl)) {
+        return { tok: p.tok || "", apikey: p.apikey || "", sbUrl: p.sbUrl || "" };
+      }
+    }
+    const qIdx = text.indexOf("?");
+    if (qIdx >= 0 && /(?:^|[?&])t=/.test(text.slice(qIdx))) {
+      const p = parseHashParams("#" + text.slice(qIdx + 1));
+      if (p && (p.tok || p.apikey || p.sbUrl)) {
+        return { tok: p.tok || "", apikey: p.apikey || "", sbUrl: p.sbUrl || "" };
+      }
+    }
+    if (/(?:^|&)t=/.test(text) || text.indexOf("t=") === 0 || text.indexOf("k=") === 0) {
+      const p = parseHashParams("#" + text);
+      if (p && (p.tok || p.apikey || p.sbUrl)) {
+        return { tok: p.tok || "", apikey: p.apikey || "", sbUrl: p.sbUrl || "" };
+      }
+    }
+    // Bare reader token (no URL, no key=value pairs)
+    if (text.indexOf("://") < 0 && text.indexOf("=") < 0 && text.indexOf(" ") < 0) {
+      return { tok: text, apikey: "", sbUrl: "" };
+    }
+    return { tok: "", apikey: "", sbUrl: "" };
+  }
+
+  function maybeSetDynamicManifest() {
+    const hash = window.location.hash || "";
+    if (!hash || isStandalone()) return;
+    const link = document.querySelector('link[rel="manifest"]');
+    if (!link) return;
+    const startUrl = window.location.pathname + window.location.search + hash;
+    fetch("./manifest.json", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((man) => {
+        if (!man) return;
+        man.start_url = startUrl;
+        const blob = new Blob([JSON.stringify(man)], { type: "application/manifest+json" });
+        const href = URL.createObjectURL(blob);
+        link.setAttribute("href", href);
+      })
+      .catch(() => {});
+  }
+
   function captureHashToken() {
     const parsed = parseHashParams(window.location.hash || "");
-    if (!parsed) return;
-    const { params, tok, apikey, sbUrl } = parsed;
-    if (tok || apikey || sbUrl) {
-      const ok = saveCredentials({ token: tok, apikey, url: sbUrl });
-      if (ok && apikey && tok) {
-        try { localStorage.setItem(SOURCE_KEY, "supabase"); } catch (_) {}
-      }
-      params.delete("t");
-      params.delete("k");
-      params.delete("apikey");
-      params.delete("u");
-      params.delete("sb");
-      const rest = params.toString();
-      const nextUrl =
-        window.location.pathname +
-        window.location.search +
-        (rest ? "#" + rest : "");
-      try {
-        window.history.replaceState(null, "", nextUrl);
-      } catch (_) {}
+    if (!parsed) return false;
+    const { tok, apikey, sbUrl } = parsed;
+    if (!(tok || apikey || sbUrl)) return false;
+    const ok = saveCredentials({ token: tok, apikey, url: sbUrl });
+    if (ok && apikey && tok) {
+      try { localStorage.setItem(SOURCE_KEY, "supabase"); } catch (_) {}
     }
+    if (isStandalone()) {
+      // Installed PWA: keep creds in its own localStorage, then strip the hash.
+      try {
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
+      } catch (_) {}
+    } else {
+      // Safari: leave #t=&k= on the URL so Add to Home Screen saves the setup.
+      maybeSetDynamicManifest();
+    }
+    return ok;
+  }
+
+  function keepSetupOnUrl(tok, apikey, sbUrl) {
+    if (isStandalone()) return;
+    const params = new URLSearchParams();
+    if (tok) params.set("t", tok);
+    if (apikey) params.set("k", apikey);
+    if (sbUrl) params.set("u", sbUrl);
+    const hash = params.toString();
+    if (!hash) return;
+    try {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search + "#" + hash
+      );
+    } catch (_) {}
+    maybeSetDynamicManifest();
   }
 
   function getAppToken() {
@@ -829,6 +909,11 @@
     }
     const demo = $("demo-banner");
     demo.hidden = !state.isExample;
+    const hint = $("install-hint");
+    if (hint) {
+      const hasCreds = hasSupabaseCredentials() || /(?:^|#|&)t=/.test(window.location.hash || "");
+      hint.hidden = isStandalone() || !hasCreds;
+    }
 
     const sdot = $("nav-status-dot");
     if (sdot) {
@@ -1633,22 +1718,22 @@
       let tok = (($("connect-token-input") || {}).value || "").trim();
       let apikey = (($("connect-apikey-input") || {}).value || "").trim();
       let sbUrl = "";
-      if (linkRaw) {
-        const hashIdx = linkRaw.indexOf("#");
-        const frag = hashIdx >= 0 ? linkRaw.slice(hashIdx + 1) : linkRaw;
-        const p = parseHashParams("#" + frag);
-        if (p) {
-          if (p.tok) tok = p.tok;
-          if (p.apikey) apikey = p.apikey;
-          if (p.sbUrl) sbUrl = p.sbUrl;
-        }
-      }
+      const fromLink = extractSetupFromText(linkRaw);
+      const fromTok = extractSetupFromText(tok);
+      if (fromLink.tok) tok = fromLink.tok;
+      else if (fromTok.tok) tok = fromTok.tok;
+      if (fromLink.apikey) apikey = fromLink.apikey;
+      else if (fromTok.apikey) apikey = fromTok.apikey;
+      if (fromLink.sbUrl) sbUrl = fromLink.sbUrl;
+      else if (fromTok.sbUrl) sbUrl = fromTok.sbUrl;
+      if (!apikey) apikey = getSbApiKey();
       if (!tok || !apikey) {
         toast("Paste your setup link or both token + publishable key");
         return;
       }
       if (!saveCredentials({ token: tok, apikey, url: sbUrl || getSbUrl() })) return;
       try { localStorage.setItem(SOURCE_KEY, "supabase"); } catch (_) {}
+      keepSetupOnUrl(tok, apikey, sbUrl || getSbUrl());
       state.sourceMode = "supabase";
       state.loading = true;
       closeSheet();
@@ -1901,6 +1986,11 @@
     render,
     commitSetting,
     findSettingSpec,
+    isStandalone,
+    extractSetupFromText,
+    captureHashToken,
+    parseHashParams,
+    keepSetupOnUrl,
     setSubView: async (type, mint) => {
       if (type === "coin") await loadCoinDetail(mint);
       if (type === "audit") await loadAuditDetail(mint);

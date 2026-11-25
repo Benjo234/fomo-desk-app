@@ -1075,6 +1075,17 @@
       ],
       "desk": [
         {
+          "name": "mode",
+          "key": "mode",
+          "value": "PAPER",
+          "type": "mode",
+          "default": "PAPER",
+          "choices": [
+            "PAPER",
+            "LIVE"
+          ]
+        },
+        {
           "name": "paper_start_cash",
           "key": "paper_start_cash",
           "value": 36,
@@ -1125,7 +1136,7 @@
         {
           "name": "withdraw_address",
           "key": "withdraw_address",
-          "value": "",
+          "value": null,
           "type": "address",
           "default": ""
         },

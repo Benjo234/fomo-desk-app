@@ -20,6 +20,8 @@
 
   const state = {
     tab: "home",
+    deskView: "orders",
+    snapshotAt: null,
     subview: null, // { type: "coin" | "audit", mint }
     range: "LIVE",
     activityFilter: "all", // "all" | "trades" | "rejected"
@@ -39,6 +41,8 @@
       account: null,
       settings: null,
       decisions: {},
+      orders: null,
+      nightReport: null,
       coins: {},
       audits: {},
       screenPayload: null,
@@ -393,9 +397,11 @@
     }
     const byKey = {};
     let latestTs = null;
+    let stateTs = null;
     rows.forEach((row) => {
       if (!row || !row.key) return;
       byKey[row.key] = row.body;
+      if (row.key === "state") stateTs = row.updated_at || null;
       if (row.updated_at && (!latestTs || row.updated_at > latestTs)) {
         latestTs = row.updated_at;
       }
@@ -410,6 +416,9 @@
     state.data.state = byKey.state;
     if (byKey.activity) state.data.activity = byKey.activity;
     if (byKey.account) state.data.account = byKey.account;
+    state.data.orders = byKey.orders || null;
+    state.data.nightReport = byKey.night_report || null;
+    state.snapshotAt = stateTs || latestTs || null;
     if (byKey.settings) state.data.settings = byKey.settings;
     RANGES.forEach((r) => {
       if (byKey["chart/" + r]) state.data.charts[r] = byKey["chart/" + r];
@@ -1020,6 +1029,7 @@
           <span class="today-pct num ${pct < 0 ? "neg" : ""}">${esc(pctStr)} today</span>
           <span class="mult-pill num">${esc(mult)}</span>
         </div>
+        ${renderHomeLive(st)}
 
         <div class="chart-wrap">
           <canvas id="home-chart" class="chart-canvas"></canvas>
@@ -1206,9 +1216,364 @@
         ).join("")}
       </div>`;
     if (!rows.length) {
-      return `${seg}<div class="empty-card">Nothing yet tonight</div>`;
+      return `${seg}<div class="empty-card">${(state.data.state && state.data.state.session && state.data.state.session.kind === "day") ? "Nothing yet today" : "Nothing yet tonight"}<div class="dk-note">New coins, skips, buys and sells show up here as they happen.</div></div>`;
     }
     return `${seg}<div class="list-card">${rows.map(renderActivityRow).join("")}</div>`;
+  }
+
+  // --- v4: DESK TAB (everything the desk publishes, in one place) ---
+  const APP_VERSION = "v4";
+  const FRESH_S = 90;   // under this = live
+  const STALE_S = 300;  // over this = stale
+
+  function ageSeconds(iso) {
+    if (!iso) return null;
+    const t = new Date(iso).getTime();
+    if (Number.isNaN(t)) return null;
+    return Math.max(0, Math.round((Date.now() - t) / 1000));
+  }
+
+  function fmtAgo(iso) {
+    const s = ageSeconds(iso);
+    if (s == null) return "no data yet";
+    if (s < 5) return "just now";
+    if (s < 60) return s + "s ago";
+    if (s < 3600) return Math.floor(s / 60) + "m ago";
+    if (s < 86400) return Math.floor(s / 3600) + "h " + Math.floor((s % 3600) / 60) + "m ago";
+    return Math.floor(s / 86400) + "d ago";
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) + " " +
+      d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+
+  function healthOf(iso) {
+    const s = ageSeconds(iso);
+    if (s == null) return { cls: "bad", label: "No data yet" };
+    if (s <= FRESH_S) return { cls: "ok", label: "Live" };
+    if (s <= STALE_S) return { cls: "warn", label: "Delayed" };
+    return { cls: "bad", label: "Stale" };
+  }
+
+  function publishedIso() {
+    const st = state.data.state;
+    if (!st) return null;
+    return state.snapshotAt || st.publishedAt || null;
+  }
+
+  function sym(x) {
+    return (x && (x.symbol || x.name)) || ((x && x.mint) ? String(x.mint).slice(0, 6) + "…" : "?");
+  }
+
+  function badge(text, cls) {
+    return `<span class="dk-badge ${cls || ""}">${esc(text)}</span>`;
+  }
+
+  function kv(k, v, cls) {
+    return `<div class="dk-kv"><div class="k">${esc(k)}</div><div class="v num ${cls || ""}">${v}</div></div>`;
+  }
+
+  function signedMoney(n) {
+    const v = Number(n);
+    if (!Number.isFinite(v)) return "—";
+    return (v >= 0 ? "+" : "−") + "$" + Math.abs(v).toFixed(2);
+  }
+
+  function coinChip(link) {
+    return link
+      ? `<a class="fomo-chip" href="${esc(link)}" target="_blank" rel="noopener noreferrer"><span class="fomo-chip-inner">FOMO</span></a>`
+      : "";
+  }
+
+  function renderLiveStrip() {
+    const iso = publishedIso();
+    const h = healthOf(iso);
+    const st = state.data.state;
+    const mode = String((st && st.mode) || "PAPER").toUpperCase();
+    return `
+      <div class="dk-live ${h.cls}" data-health-iso="${esc(iso || "")}">
+        <span class="dot"></span>
+        <div class="dk-live-main">
+          <div class="dk-live-title"><span data-health-label>${esc(h.label)}</span> · updated <span data-age-iso="${esc(iso || "")}">${esc(fmtAgo(iso))}</span></div>
+          <div class="dk-live-sub">${esc(mode)} mode · desk publishes every 30s · this page checks every 15s · app ${APP_VERSION}</div>
+        </div>
+        <button class="dk-refresh" type="button" data-desk-refresh>Refresh</button>
+      </div>`;
+  }
+
+  function renderSessionCard(st) {
+    const se = st.session;
+    if (!se) {
+      return `<div class="dk-card"><h3>Session</h3><div class="dk-empty">The desk hasn't reported a session yet.</div></div>`;
+    }
+    if (!se.kind) {
+      return `<div class="dk-card"><h3>Session</h3>
+        <div class="dk-head"><div class="dk-big">No session open</div>${badge("IDLE")}</div>
+        <div class="dk-empty">Nothing is trading right now.${se.dayTrading ? " Day trading is on (" + esc(se.dayWindow || "") + "), the next day session opens after the morning report." : " Day trading is off. The next night session opens at 22:00."}</div></div>`;
+    }
+    const cap = Number(se.tradeCap || 0), used = Number(se.trades || 0);
+    const pct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0;
+    const isDay = se.kind === "day";
+    const liveNote = se.countsForLive
+      ? "This night counts toward the LIVE gate."
+      : "Day sessions never count toward LIVE. Only a full PAPER night does.";
+    return `
+      <div class="dk-card">
+        <h3>Session</h3>
+        <div class="dk-head">
+          <div class="dk-big">${esc(isDay ? "Day session" : "Night session")}</div>
+          <div>${badge(isDay ? "DAY" : "NIGHT", isDay ? "day" : "night")} ${badge(se.active ? "OPEN" : String(se.status || "").toUpperCase(), se.active ? "good" : "warn")}</div>
+        </div>
+        <div class="dk-grid">
+          ${kv("Mode", esc(String(se.mode || st.mode || "PAPER")))}
+          ${kv("Start cash", esc(fmtMoney(se.startCash)))}
+          ${kv("Started", esc(fmtDateTime(se.startedAt)))}
+          ${kv("Closes", esc(fmtDateTime(se.lockAt)))}
+        </div>
+        <div class="dk-note">Trades this session: <b>${esc(used)}</b> of <b>${esc(cap)}</b> allowed</div>
+        <div class="dk-bar"><i style="width:${pct}%"></i></div>
+        <div class="dk-note">${esc(liveNote)}</div>
+      </div>`;
+  }
+
+  function renderMoneyCard(st) {
+    const p = st.pnl;
+    const bal = fmtMoney(st.balance);
+    if (!p) {
+      return `<div class="dk-card"><h3>Money</h3><div class="dk-grid">${kv("Cash", esc(bal))}${kv("Today", esc((Number(st.todayPct || 0) >= 0 ? "+" : "") + Number(st.todayPct || 0).toFixed(2) + "%"))}</div></div>`;
+    }
+    const cls = (n) => (Number(n) > 0 ? "pos" : Number(n) < 0 ? "neg" : "");
+    const pct = p.sessionPct;
+    return `
+      <div class="dk-card">
+        <h3>Money · ${esc(String(st.mode || "PAPER").toUpperCase())}</h3>
+        <div class="dk-grid">
+          ${kv("Cash", esc(bal))}
+          ${kv("Total value", esc(fmtMoney(p.equityUsd)))}
+          ${kv("Session P&L", esc(pct == null ? "—" : (pct >= 0 ? "+" : "") + Number(pct).toFixed(2) + "%"), cls(pct))}
+          ${kv("Realized", esc(signedMoney(p.realizedUsd)), cls(p.realizedUsd))}
+          ${kv("Open now", esc(fmtMoney(p.openValueUsd)))}
+          ${kv("Unrealized", esc(signedMoney(p.unrealizedUsd)), cls(p.unrealizedUsd))}
+        </div>
+        <div class="dk-note">Measured from the session's start cash of ${esc(fmtMoney(p.baseUsd))}. PAPER money, no real funds.</div>
+      </div>`;
+  }
+
+  function renderPositionsCard(st) {
+    const pos = st.positions || [];
+    const body = pos.length
+      ? pos.map((p) => {
+          const pnl = p.pnlPct;
+          const cls = pnl > 0 ? "pos" : pnl < 0 ? "neg" : "";
+          return `<div class="dk-row">
+            <div class="l"><div class="t">${esc(sym(p))} · ${esc(fmtMoney(p.size_usd))}</div>
+              <div class="s">opened ${esc(fmtDateTime(p.opened_at))}${p.stop_price ? " · stop " + esc(fmtPrice(p.stop_price)) : ""}${p.price ? " · now " + esc(fmtPrice(p.price)) : ""}</div></div>
+            <div class="r"><div class="num ${cls}" style="${pnl > 0 ? "color:var(--green)" : pnl < 0 ? "color:var(--red)" : ""}">${pnl == null ? "—" : (pnl >= 0 ? "+" : "") + pnl + "%"}</div>${coinChip(p.link)}</div>
+          </div>`;
+        }).join("")
+      : `<div class="dk-empty">No open positions. The desk is flat, waiting for a coin that passes every check.</div>`;
+    return `<div class="dk-card"><h3>Open positions · ${pos.length}</h3>${body}</div>`;
+  }
+
+  function orderStatus(o) {
+    const err = String(o.error || "");
+    if (o.status === "done" && /PAPER stopped before/i.test(err)) return { t: "PAPER · not clicked", c: "good" };
+    if (o.status === "done") return { t: "done", c: "good" };
+    if (o.status === "failed") return { t: "failed", c: "bad" };
+    return { t: String(o.status || "queued"), c: "warn" };
+  }
+
+  function renderOrderRow(o) {
+    const s = orderStatus(o);
+    const what = (o.side === "sell" ? "Sell " : "Buy ") + sym(o);
+    const amt = o.usd != null ? fmtMoney(o.usd) : (o.pct ? o.pct + "%" : "—");
+    const bits = [fmtDateTime(o.ts), o.bot, o.reason, o.quote_text, o.fee_text].filter(Boolean).join(" · ");
+    const risk = o.risk_box_ticked
+      ? `<div class="dk-risk"><b>Risk box ticked.</b> ${esc(o.risk_warning || "No warning text recorded")}</div>`
+      : (o.risk_warning ? `<div class="dk-risk"><b>Risk warning.</b> ${esc(o.risk_warning)}</div>` : "");
+    const ERR_COPY = {
+      "box to tick": "Skipped: FOMO showed a box other than the one allowed risk box",
+      "button disabled": "Skipped: the Buy button was greyed out",
+      "no cash": "Skipped: FOMO cash was empty",
+      "amount mismatch": "Skipped: the amount on screen did not match",
+    };
+    const err = o.status === "failed" && o.error ? `<div class="s" style="color:var(--red)">${esc(ERR_COPY[o.error] || o.error)}</div>` : "";
+    return `<div class="dk-row">
+      <div class="l"><div class="t">${esc(what)} · ${esc(amt)}</div><div class="s">${esc(bits)}</div>${err}${risk}</div>
+      <div class="r">${badge(s.t, s.c)}<div>${coinChip(o.link)}</div></div>
+    </div>`;
+  }
+
+  function renderOrdersCard() {
+    const rows = (state.data.orders && state.data.orders.rows) || [];
+    const body = rows.length
+      ? rows.map(renderOrderRow).join("")
+      : `<div class="dk-empty">No orders yet. Orders appear here when the Executor clicks Buy or Sell.</div>`;
+    return `<div class="dk-card"><h3>Orders · ${rows.length}</h3>${body}</div>`;
+  }
+
+  function renderFunnelCard(st) {
+    const f = st.funnel;
+    if (!f) return "";
+    const s = f.scanner || {}, a = f.analyst || {};
+    const since = f.since ? "since " + fmtDateTime(f.since) : "";
+    const tile = (n, l) => `<div class="f"><b class="num">${esc(fmtInt(n))}</b><span>${esc(l)}</span></div>`;
+    return `
+      <div class="dk-card"><h3>What the desk looked at ${esc(since)}</h3>
+        <div class="dk-funnel">${tile(s.total, "scanned")}${tile(s.pass, "to Analyst")}${tile(s.kill, "killed")}${tile(s.drop, "dropped")}</div>
+        <div class="dk-funnel">${tile(a.taken, "audited")}${tile(a.passed, "passed")}${tile(a.refused, "refused")}${tile(((f.orders || {})["buy/done"]) || 0, "bought")}</div>
+      </div>`;
+  }
+
+  function decisionRows(bot) {
+    const d = state.data.decisions[bot];
+    return (d && d.decisions) || [];
+  }
+
+  function renderDecisionList() {
+    const view = state.deskView;
+    if (view === "orders") return renderOrdersCard();
+    const rows = decisionRows(view);
+    if (!rows.length) {
+      return `<div class="dk-card"><div class="dk-empty">${view === "scanner" ? "The Scanner hasn't judged any coin yet." : "The Analyst hasn't taken any coin apart yet."}</div></div>`;
+    }
+    const html = rows.map((r) => {
+      if (view === "scanner") {
+        const v = String(r.verdict || "?");
+        const c = v === "pass" ? "good" : v === "kill" ? "bad" : "warn";
+        return `<div class="dk-row"><div class="l"><div class="t">${esc(sym(r))}</div>
+          <div class="s">${esc(fmtDateTime(r.ts))} · ${esc(r.reason || "no reason recorded")}</div></div>
+          <div class="r">${badge(v.toUpperCase(), c)}<div>${coinChip(r.link)}</div></div></div>`;
+      }
+      const passed = r.passed === true;
+      return `<div class="dk-row"><div class="l"><div class="t">${esc(sym(r))} · score ${r.score != null ? esc(Math.round(r.score)) : "—"}</div>
+        <div class="s">${esc(fmtDateTime(r.ts))} · ${esc(r.reason || (passed ? "all layers passed" : "no reason recorded"))}</div></div>
+        <div class="r">${badge(passed ? "PASSED" : "REFUSED", passed ? "good" : "bad")}<div>${coinChip(r.link)}</div></div></div>`;
+    }).join("");
+    return `<div class="dk-card"><h3>Latest ${rows.length} ${view === "scanner" ? "Scanner verdicts" : "Analyst audits"}</h3>${html}</div>`;
+  }
+
+  function renderBotsCard(st) {
+    const bots = st.bots || [];
+    if (!bots.length) return "";
+    const rows = bots.map((b) => {
+      const h = healthOf(b.lastBeat);
+      const c = b.paused ? "warn" : (b.status === "running" && h.cls !== "bad" ? "good" : "bad");
+      return `<div class="dk-bot">
+        <span class="sw" style="background:${esc(b.color || "var(--secondary)")}"></span>
+        <div style="flex:1;min-width:0"><div class="t" style="font-weight:600">${esc(BOT_LABELS[b.name] || b.name)} · ${esc(b.title || "")}</div>
+          <div class="s" style="color:var(--secondary);font-size:12px">${esc(b.subtitle || "")} · heartbeat <span data-age-iso="${esc(b.lastBeat || "")}">${esc(fmtAgo(b.lastBeat))}</span></div></div>
+        ${badge(b.paused ? "PAUSED" : String(b.status || "idle").toUpperCase(), c)}
+      </div>`;
+    }).join("");
+    return `<div class="dk-card"><h3>Bots · heartbeat</h3>${rows}</div>`;
+  }
+
+  function renderNightReportCard() {
+    const nr = state.data.nightReport;
+    if (!nr || !nr.night) {
+      return `<div class="dk-card"><h3>Night report</h3><div class="dk-empty">No night report yet. The first one appears at 08:00 after a night closes.</div></div>`;
+    }
+    const n = nr.night;
+    const kills = (nr.scannerKills && nr.scannerKills.total) || 0;
+    const reasons = ((nr.scannerKills && nr.scannerKills.byReason) || []).slice(0, 5)
+      .map((x) => `${x.reason} ×${x.count}`).join(" · ");
+    const refusals = nr.analystRefusals || {};
+    const layers = (refusals.byLayer || []).map((x) => `${x.layer} ×${x.count}`).join(" · ");
+    const pnl = Number(n.pnl_usd || 0);
+    return `
+      <div class="dk-card"><h3>Latest night report · night ${esc(n.id)}</h3>
+        <div class="dk-head"><div class="dk-big">${esc(signedMoney(pnl))}</div>${badge(String(n.status || "").toUpperCase(), n.status === "completed" ? "good" : "warn")}</div>
+        <div class="dk-grid">
+          ${kv("Start cash", esc(fmtMoney(n.start_cash)))}
+          ${kv("End cash", esc(fmtMoney(n.end_cash)))}
+          ${kv("Trades", esc(n.trades != null ? n.trades : 0))}
+          ${kv("Sold at lock", esc(n.positions_sold != null ? n.positions_sold : 0))}
+          ${kv("Opened", esc(fmtDateTime(n.started_at)))}
+          ${kv("Closed", esc(fmtDateTime(n.ended_at)))}
+        </div>
+        <div class="dk-note">Scanner killed <b>${esc(fmtInt(kills))}</b> coins${reasons ? " (top reasons: " + esc(reasons) + ")" : ""}.</div>
+        <div class="dk-note">Analyst refused <b>${esc(fmtInt(refusals.total || 0))}</b>${layers ? " (" + esc(layers) + ")" : ""}.</div>
+        <div class="dk-note">Report written ${esc(fmtDateTime(nr.ts))}${(nr.usage && nr.usage.paperNightRecorded === false) ? " · counts toward LIVE: not yet" : ""}.</div>
+      </div>`;
+  }
+
+  const KEY_SETTINGS = [
+    "mode", "day_trading", "day_start", "day_end", "max_trades_day", "night_start", "lock_time",
+    "report_time", "max_trades_night", "min_score", "max_ticket_usd", "stop_pct", "trail_pct",
+    "dip_pct", "tp_x", "night_loss_stop_pct",
+  ];
+
+  function renderSettingsCard() {
+    const se = state.data.settings;
+    const mode = String((se && se.mode) || (state.data.state && state.data.state.mode) || "PAPER").toUpperCase();
+    if (!se || !se.groups) {
+      return `<div class="dk-card"><h3>Settings</h3><div class="dk-head"><div class="dk-big">${esc(mode)}</div></div><div class="dk-empty">Settings haven't been published yet.</div></div>`;
+    }
+    const flat = {};
+    Object.keys(se.groups).forEach((g) => (se.groups[g] || []).forEach((s) => { flat[s.key] = s; }));
+    const show = (s) => {
+      let v = s.value;
+      if (typeof v === "boolean") v = v ? "on" : "off";
+      return `<div class="dk-set"><span>${esc(s.name || s.key)}</span><b>${esc(v)}</b></div>`;
+    };
+    const key = KEY_SETTINGS.map((k) => flat[k]).filter(Boolean).map(show).join("");
+    const groups = Object.keys(se.groups).map((g) =>
+      `<details class="dk-det"><summary>${esc(g)} (${(se.groups[g] || []).length})</summary>${(se.groups[g] || []).map(show).join("")}</details>`
+    ).join("");
+    return `<div class="dk-card"><h3>Mode &amp; settings</h3>
+      <div class="dk-head"><div class="dk-big">${esc(mode)}</div>${badge(mode === "PAPER" ? "NO REAL MONEY" : "LIVE", mode === "PAPER" ? "good" : "bad")}</div>
+      ${key}${groups}
+      <div class="dk-note">Read only. Changes go through Grok Bot.</div></div>`;
+  }
+
+  function renderDeskTab() {
+    const st = state.data.state;
+    if (!st) return renderWaitingSetup();
+    const tabs = [["orders", "Orders"], ["scanner", "Scanner"], ["analyst", "Analyst"]];
+    const seg = `<div class="dk-seg" role="tablist">${tabs.map(([k, l]) =>
+      `<button type="button" data-desk-view="${k}" class="${state.deskView === k ? "active" : ""}">${l}</button>`).join("")}</div>`;
+    return `
+      ${renderLiveStrip()}
+      ${renderSessionCard(st)}
+      ${renderMoneyCard(st)}
+      ${renderPositionsCard(st)}
+      ${renderFunnelCard(st)}
+      ${seg}
+      ${renderDecisionList()}
+      ${renderBotsCard(st)}
+      ${renderNightReportCard()}
+      ${renderSettingsCard()}
+      <div class="dk-foot">Grok Bot desk · app ${APP_VERSION} · data from the server's Supabase snapshot</div>`;
+  }
+
+  function renderHomeLive(st) {
+    const iso = publishedIso();
+    const h = healthOf(iso);
+    const se = st.session;
+    const sess = se && se.kind
+      ? `${se.kind === "day" ? "Day" : "Night"} session · ${se.trades || 0}/${se.tradeCap || 0} trades`
+      : "No session open";
+    return `<div class="home-live ${h.cls}" data-health-iso="${esc(iso || "")}"><span class="dot"></span>
+      <span><b data-health-label>${esc(h.label)}</b> · updated <span data-age-iso="${esc(iso || "")}">${esc(fmtAgo(iso))}</span></span>
+      <span>· ${esc(sess)}</span></div>`;
+  }
+
+  function tickAges() {
+    document.querySelectorAll("[data-age-iso]").forEach((el) => {
+      el.textContent = fmtAgo(el.getAttribute("data-age-iso"));
+    });
+    document.querySelectorAll("[data-health-iso]").forEach((el) => {
+      const h = healthOf(el.getAttribute("data-health-iso"));
+      el.classList.remove("ok", "warn", "bad");
+      el.classList.add(h.cls);
+      const lab = el.querySelector("[data-health-label]");
+      if (lab) lab.textContent = h.label;
+    });
   }
 
   // --- AUDIT SUBSCREEN ---
@@ -1534,6 +1899,8 @@
         : renderAuditScreen(state.subview.mint);
     } else if (state.tab === "home") {
       root.innerHTML = renderHome();
+    } else if (state.tab === "desk") {
+      root.innerHTML = renderDeskTab();
     } else if (state.tab === "bots") {
       root.innerHTML = renderBotsTab();
     } else if (state.tab === "activity") {
@@ -1667,6 +2034,18 @@
       state.tab = "account";
       state.subview = null;
       render();
+      return;
+    }
+    if (t.closest("[data-desk-view]")) {
+      state.deskView = t.closest("[data-desk-view]").dataset.deskView;
+      render();
+      return;
+    }
+    if (t.closest("[data-desk-refresh]")) {
+      const b = t.closest("[data-desk-refresh]");
+      b.textContent = "…";
+      await refreshData();
+      toast("Refreshed");
       return;
     }
     if (t.closest("[data-act-filter]")) {
@@ -2004,8 +2383,19 @@
     },
   };
 
+  (function applyQueryView() {
+    const q = new URLSearchParams(window.location.search);
+    const tab = q.get("tab");
+    if (tab && ["home", "desk", "bots", "activity", "account"].indexOf(tab) >= 0) state.tab = tab;
+    const dv = q.get("view");
+    if (dv && ["orders", "scanner", "analyst"].indexOf(dv) >= 0) state.deskView = dv;
+  })();
   render();
   refreshData();
+  setInterval(tickAges, 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshData();
+  });
   setInterval(() => {
     if (state.error) {
       state.retryIn = state.retryIn <= 1 ? 15 : state.retryIn - 1;

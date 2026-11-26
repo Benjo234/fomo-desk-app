@@ -1,9 +1,9 @@
-const CACHE = "desk-shell-v13";
+const CACHE = "desk-shell-v4-20261126";
 const ASSETS = [
   "./",
   "./index.html",
-  "./app.css",
-  "./app.js",
+  "./app.css?v=4",
+  "./app.js?v=4",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
@@ -28,8 +28,17 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.includes("/api/") || url.pathname.endsWith(".jpg") || url.pathname.endsWith("demo.json")) {
     return;
   }
+  // Network first so a new version is picked up on the next open; cache only when offline.
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(event.request, copy)).catch(() => {});
+        }
+        return res;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
   );
 });
 

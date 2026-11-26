@@ -1030,6 +1030,7 @@
           <span class="mult-pill num">${esc(mult)}</span>
         </div>
         ${renderHomeLive(st)}
+        ${renderLanesCard(st, true)}
 
         <div class="chart-wrap">
           <canvas id="home-chart" class="chart-canvas"></canvas>
@@ -1222,7 +1223,7 @@
   }
 
   // --- v4: DESK TAB (everything the desk publishes, in one place) ---
-  const APP_VERSION = "v4";
+  const APP_VERSION = "v5";
   const FRESH_S = 90;   // under this = live
   const STALE_S = 300;  // over this = stale
 
@@ -1370,7 +1371,7 @@
           const pnl = p.pnlPct;
           const cls = pnl > 0 ? "pos" : pnl < 0 ? "neg" : "";
           return `<div class="dk-row">
-            <div class="l"><div class="t">${esc(sym(p))} · ${esc(fmtMoney(p.size_usd))}</div>
+            <div class="l"><div class="t">${isBig(p) ? bigTag() + " " : ""}${esc(sym(p))} · ${esc(fmtMoney(p.size_usd))}</div>
               <div class="s">opened ${esc(fmtDateTime(p.opened_at))}${p.stop_price ? " · stop " + esc(fmtPrice(p.stop_price)) : ""}${p.price ? " · now " + esc(fmtPrice(p.price)) : ""}</div></div>
             <div class="r"><div class="num ${cls}" style="${pnl > 0 ? "color:var(--green)" : pnl < 0 ? "color:var(--red)" : ""}">${pnl == null ? "—" : (pnl >= 0 ? "+" : "") + pnl + "%"}</div>${coinChip(p.link)}</div>
           </div>`;
@@ -1403,7 +1404,7 @@
     };
     const err = o.status === "failed" && o.error ? `<div class="s" style="color:var(--red)">${esc(ERR_COPY[o.error] || o.error)}</div>` : "";
     return `<div class="dk-row">
-      <div class="l"><div class="t">${esc(what)} · ${esc(amt)}</div><div class="s">${esc(bits)}</div>${err}${risk}</div>
+      <div class="l"><div class="t">${isBig(o) ? bigTag() + " " : ""}${esc(what)} · ${esc(amt)}</div><div class="s">${esc(bits)}</div>${err}${risk}</div>
       <div class="r">${badge(s.t, s.c)}<div>${coinChip(o.link)}</div></div>
     </div>`;
   }
@@ -1531,6 +1532,98 @@
       <div class="dk-note">Read only. Changes go through Grok Bot.</div></div>`;
   }
 
+  // --- v5: two strategies (lanes) side by side ---
+  function isBig(x) {
+    return !!x && (x.lane === "bigtoken" || /^big-token/i.test(String(x.reason || "")) || /^big-token/i.test(String(x.exit_reason || "")));
+  }
+
+  function bigTag() {
+    return `<span class="dk-badge big">BIG</span>`;
+  }
+
+  function lanePctOf(used, total) {
+    const u = Number(used || 0), t = Number(total || 0);
+    return t > 0 ? Math.max(0, Math.min(100, Math.round((u / t) * 100))) : 0;
+  }
+
+  function bigRulesSummary(r) {
+    if (!r) return "";
+    const k = (n) => (n >= 1e6 ? "$" + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + "M" : "$" + Math.round(n / 1000) + "k");
+    return `Liquidity ≥ ${k(r.bigtoken_min_liq_usd)}, market cap ≥ ${k(r.bigtoken_min_mcap_usd)}, 24h volume ≥ ${k(r.bigtoken_min_vol24_usd)}. ` +
+      `Buys when up ${r.bigtoken_min_h1_pct}–${r.bigtoken_max_h1_pct}% in 1h on ${r.bigtoken_vol_surge_x}× volume with buyers leading. ` +
+      `Stop −${r.bigtoken_stop_pct}%, sells ${r.bigtoken_tp_sell_pct}% at +${r.bigtoken_tp_pct}%, trails ${r.bigtoken_trail_pct}%, max ${r.bigtoken_max_hold_h}h.`;
+  }
+
+  function newcoinRulesSummary() {
+    const se = state.data.settings;
+    const flat = {};
+    if (se && se.groups) Object.values(se.groups).forEach((g) => (g || []).forEach((s) => { flat[s.key || s.name] = s.value; }));
+    const liq = flat.min_liquidity_usd, h1 = flat.max_h1_change_pct, ms = flat.min_score, stop = flat.stop_pct;
+    const parts = [];
+    if (liq != null) parts.push(`Liquidity ≥ $${Math.round(liq / 1000)}k`);
+    if (h1 != null) parts.push(`up ≤ ${h1}% in 1h`);
+    if (ms != null) parts.push(`Analyst score ≥ ${ms}`);
+    if (stop != null) parts.push(`stop −${stop}%`);
+    return parts.length ? "New pump.fun graduates. " + parts.join(", ") + "." : "New pump.fun graduates that pass all 8 Analyst checks.";
+  }
+
+  function laneOpenPositions(big) {
+    const pos = (state.data.state && state.data.state.positions) || [];
+    return pos.filter((p) => (big ? isBig(p) : !isBig(p)));
+  }
+
+  function laneCandidatesHtml(cands, compact) {
+    if (!cands || !cands.length) return `<div class="dk-empty">No scan yet. Candidates show up after the lane's first check.</div>`;
+    const rows = cands.slice(0, compact ? 4 : 8).map((c) => {
+      const st = c.signal ? badge("BUY SIGNAL", "good") : c.qualified ? badge("WATCHING", "warn") : badge("SKIP");
+      const h1 = c.change_h1 == null ? "—" : (c.change_h1 >= 0 ? "+" : "") + Number(c.change_h1).toFixed(2) + "%";
+      return `<div class="dk-row"><div class="l"><div class="t">${esc(c.symbol || (c.mint || "").slice(0, 6))} · 1h ${esc(h1)}</div>
+        <div class="s">${esc(c.reason || "")}${c.liquidity_usd ? " · liq " + esc(fmtCompactMoney(c.liquidity_usd)) : ""}</div></div>
+        <div class="r">${st}<div>${coinChip(c.link)}</div></div></div>`;
+    }).join("");
+    return rows;
+  }
+
+  function renderLaneBox(l, big) {
+    if (!l) return "";
+    const on = !!l.enabled;
+    const capPct = lanePctOf(l.trades, l.cap);
+    const open = laneOpenPositions(big);
+    const inUse = big ? Number(l.inUseUsd || 0) : open.reduce((a, p) => a + Number(p.size_usd || 0), 0);
+    const cash = state.data.state ? state.data.state.balance : null;
+    const budget = big ? fmtMoney(l.budgetUsd || 0) : (cash != null ? fmtMoney(cash) : "—");
+    const line = (k, v) => `<div class="dk-lrow"><span>${esc(k)}</span><b class="num">${v}</b></div>`;
+    return `<div class="dk-lane ${big ? "big" : "new"}" data-lane="${esc(l.key || "")}">
+      <div class="dk-lane-title">${big ? bigTag() : ""}<span>${esc(l.label || (big ? "Big tokens" : "New coins"))}</span></div>
+      ${badge(on ? "ON · PAPER" : "OFF", on ? "good" : "")}
+      <div class="dk-bar"><i style="width:${capPct}%"></i></div>
+      ${line("Cap used", esc((l.trades || 0) + " / " + (l.cap || 0)) + `<small> ${big ? "24h" : "session"}</small>`)}
+      ${line("Budget", esc(budget))}
+      ${line("In use", esc(fmtMoney(inUse)))}
+      ${line("Positions", esc(l.openPositions != null ? l.openPositions : open.length))}
+      ${big ? line("Ticket", esc(fmtMoney(l.ticketUsd || 0))) : line("Ticket", "risk-sized")}
+      ${line("Candidates", big ? esc((l.qualified || 0) + " qualify · " + (l.signals || 0) + " signal") : esc(((((state.data.state || {}).funnel || {}).analyst || {}).passed || 0) + " passed"))}
+    </div>`;
+  }
+
+  function renderLanesCard(st, compact) {
+    const L = st && st.lanes;
+    if (!L) return compact ? "" : `<div class="dk-card"><h3>Strategies</h3><div class="dk-empty">The desk hasn't published its strategies yet.</div></div>`;
+    const big = L.bigtoken || {};
+    const f = st.funnel || {}, s = f.scanner || {}, a = f.analyst || {};
+    const detail = compact ? `<div class="dk-note">Big tokens${big.lastScanAt ? " checked " + esc(fmtAgo(big.lastScanAt)) : ""} · ${esc(big.qualified || 0)} watched, ${esc(big.signals || 0)} buy signals. <button class="link-btn" data-go-tab="desk" type="button">Details</button></div>`
+      : `<div class="dk-sub">New coins · candidates this session</div>
+         <div class="dk-note">${esc(fmtInt(s.total || 0))} scanned · ${esc(fmtInt(s.pass || 0))} sent to the Analyst · ${esc(fmtInt(a.passed || 0))} passed.</div>
+         <div class="dk-rules">${esc(newcoinRulesSummary())}</div>
+         <div class="dk-sub">${bigTag()} Big tokens · candidates${big.lastScanAt ? " · checked " + esc(fmtAgo(big.lastScanAt)) : ""}</div>
+         ${laneCandidatesHtml(big.candidates, false)}
+         <div class="dk-rules">${esc(bigRulesSummary(big.rules))} Ticket ${esc(fmtMoney(big.ticketUsd || 0))}, at most ${esc(big.cap || 0)} buys per 24h, ${esc(fmtMoney(big.newcoinReserveUsd || 0))} always kept for new coins.</div>`;
+    return `<div class="dk-card dk-lanes-card"><h3>Strategies · side by side</h3>
+      <div class="dk-lanes">${renderLaneBox(L.newcoin, false)}${renderLaneBox(L.bigtoken, true)}</div>
+      ${detail}
+      ${compact ? "" : `<div class="dk-note">Each strategy has its own trade cap and money. The session loss stop is shared. PAPER only.</div>`}</div>`;
+  }
+
   function renderDeskTab() {
     const st = state.data.state;
     if (!st) return renderWaitingSetup();
@@ -1540,6 +1633,7 @@
     return `
       ${renderLiveStrip()}
       ${renderSessionCard(st)}
+      ${renderLanesCard(st, false)}
       ${renderMoneyCard(st)}
       ${renderPositionsCard(st)}
       ${renderFunnelCard(st)}

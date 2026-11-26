@@ -1,9 +1,9 @@
-const CACHE = "desk-shell-v4-20261126";
+const CACHE = "desk-shell-v5-20261126";
 const ASSETS = [
   "./",
   "./index.html",
-  "./app.css?v=4",
-  "./app.js?v=4",
+  "./app.css?v=5",
+  "./app.js?v=5",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
